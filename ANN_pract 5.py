@@ -1,14 +1,36 @@
 import numpy as np
-X = np.array([[1, 1, 1, -1], [-1, -1, 1, 1]])
-Y = np.array([[1, -1], [-1, 1]])
+
+# Training data
+X = np.array([[1, 1, 1, -1],
+              [-1, -1, 1, 1]])
+Y = np.array([[1, -1],
+              [-1, 1]])
+
+# Weight matrix using outer product sum
 W = np.dot(Y.T, X)
 
-def bam(x):
-    return np.sign(np.dot(W, x))
+# Sign function that handles zero
+def custom_sign(x):
+    return np.where(x >= 0, 1, -1)
 
+# BAM recall function (iterates until convergence)
+def bam_bidirectional(x_init, max_iters=10):
+    x = x_init.copy()
+    for _ in range(max_iters):
+        y = custom_sign(np.dot(W, x))          # X to Y
+        x_new = custom_sign(np.dot(W.T, y))    # Y to X
+        if np.array_equal(x, x_new):           # Check for convergence
+            break
+        x = x_new
+    return x, y
+
+# Test input
 x_test = np.array([1, -1, -1, -1])
-y_test = bam(x_test)
 
+# Run BAM
+x_final, y_final = bam_bidirectional(x_test)
 
-print("Input x:", x_test)
-print("Output y:", y_test)
+# Print results
+print("Initial input x:", x_test)
+print("Final recalled x:", x_final)
+print("Recalled y:", y_final)
